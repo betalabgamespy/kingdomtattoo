@@ -28,14 +28,17 @@
             <div class="grupo-artistas">
                 <img class="img-artistas" src="https://i.pinimg.com/736x/8f/5d/11/8f5d112c78df7f1b98691b26cdbad5d1.jpg" alt="">
                 <h5 class="nom-artistas" >Bang Bang </h5>
+                <p  class="descripcion-artistas" >Estilo Gótico/Tradicional</p>
             </div>
             <div class="grupo-artistas">
                  <img class="img-artistas" src="https://i.pinimg.com/1200x/a5/3a/ab/a53aab17831a0364da8841de99c7afd9.jpg" alt="">
                 <h5 class="nom-artistas" >Dr. Woo</h5>
+                <p class="descripcion-artistas" >Minimalista/Lineas Finas</p>
             </div>
             <div class="grupo-artistas">
                 <img class="img-artistas" src="https://i.pinimg.com/736x/64/d5/99/64d59983279c7a4819434c35bf05c766.jpg" alt="">
                 <h5 class="nom-artistas" >Paul Both</h5>
+                <p class="descripcion-artistas" >Blackwork/Dark art</p>
             </div>
         </div>
     </section>
@@ -51,5 +54,48 @@
             <img class="img-galeria-trabajos" src="https://i.pinimg.com/1200x/da/db/c8/dadbc89b6f342de780575ed772239894.jpg" alt="">
         </div>
     </section>
+
+        <!--SECCION VALORACION-->
+    <section class="seccion-comentarios">
+    <h2>Opiniones</h2>
+    
+    <div class="formulario">
+        <input type="text" id="nombre" placeholder="Tu nombre">
+        
+        <!-- Estrellas interactivas -->
+        <div class="estrellas-container">
+            <div class="estrellas">
+                <span class="estrella" data-value="1">★</span>
+                <span class="estrella" data-value="2">★</span>
+                <span class="estrella" data-value="3">★</span>
+                <span class="estrella" data-value="4">★</span>
+                <span class="estrella" data-value="5">★</span>
+            </div>
+            <div class="puntuacion-texto">Selecciona estrellas</div>
+        </div>
+        
+        <textarea id="comentario" placeholder="Tu comentario..." rows="3"></textarea>
+        <button class="btn-enviar">Enviar</button>
+    </div>
+    
+    <div class="lista-comentarios">
+        <!-- Comentarios existentes aquí -->
+    </div>
+</section>
+
+<!--FOOTER-->
+<footer>
+    <div class="footer1" >
+        <a class="paginas-footer" href="">Inicio</a>
+        <a class="paginas-footer" href="">Artistas</a>
+        <a class="paginas-footer" href="">Información</a>
+        <a class="paginas-footer" href="">Contacto</a>
+    </div>
+    <div class="footer2" >
+        <p class="copy" >&copy; 2024 KINGDOMTATTOO. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+<script src="JAVASCRIPTS/valoracion.js"></script>
 </body>
 </html>
