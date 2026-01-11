@@ -1,4 +1,4 @@
-// Estrellas interactivas + botón enviar
+// Estrellas interactivas + botón enviar + límite de 5 comentarios
 document.addEventListener('DOMContentLoaded', function() {
     const estrellas = document.querySelectorAll('.estrella');
     let puntuacion = 0;
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const nombre = document.getElementById('nombre').value.trim();
             const comentario = document.getElementById('comentario').value.trim();
             
-            // VALIDACIÓN MINIMALISTA
+            // VALIDACIÓN
             if(nombre === '') {
                 mostrarMensaje('Escribe tu nombre', 'error');
                 document.getElementById('nombre').focus();
@@ -80,17 +80,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="estrellas-comentario">${'★'.repeat(puntuacion)}${'☆'.repeat(5-puntuacion)}</div>
                 </div>
                 <p class="texto-comentario">${comentario}</p>
-                <span class="fecha">Hace un momento</span>
+                <span class="fecha">${obtenerFechaActual()}</span>
             `;
             
-            // Añadir animación de entrada
+            // Añadir animación
             nuevoComentario.style.opacity = '0';
             nuevoComentario.style.transform = 'translateY(10px)';
             
-            // Añadir al principio de la lista
+            // Añadir al principio y LIMITAR A 5
             const listaComentarios = document.querySelector('.lista-comentarios');
             if(listaComentarios) {
+                // Añadir nuevo comentario al principio
                 listaComentarios.insertBefore(nuevoComentario, listaComentarios.firstChild);
+                
+                // Mantener solo los primeros 5 comentarios
+                const todosComentarios = listaComentarios.querySelectorAll('.comentario');
+                if(todosComentarios.length > 5) {
+                    // Eliminar el comentario más antiguo (el último)
+                    todosComentarios[5].remove();
+                }
                 
                 // Animar entrada
                 setTimeout(() => {
@@ -117,20 +125,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // FUNCIÓN PARA MOSTRAR MENSAJES MINIMALISTAS
+    // FUNCIÓN PARA OBTENER FECHA ACTUAL
+    function obtenerFechaActual() {
+        const ahora = new Date();
+        const horas = ahora.getHours().toString().padStart(2, '0');
+        const minutos = ahora.getMinutes().toString().padStart(2, '0');
+        return `Hoy ${horas}:${minutos}`;
+    }
+    
+    // FUNCIÓN PARA MOSTRAR MENSAJES
     function mostrarMensaje(texto, tipo) {
-        // Remover mensaje anterior si existe
         const mensajeAnterior = document.querySelector('.mensaje-flotante');
         if(mensajeAnterior) {
             mensajeAnterior.remove();
         }
         
-        // Crear nuevo mensaje
         const mensaje = document.createElement('div');
         mensaje.className = 'mensaje-flotante';
         mensaje.textContent = texto;
         
-        // Estilos según tipo
         mensaje.style.cssText = `
             position: fixed;
             top: 20px;
@@ -156,16 +169,13 @@ document.addEventListener('DOMContentLoaded', function() {
             mensaje.style.border = '1px solid #c8e6c9';
         }
         
-        // Añadir al documento
         document.body.appendChild(mensaje);
         
-        // Animar entrada
         setTimeout(() => {
             mensaje.style.opacity = '1';
             mensaje.style.transform = 'translateX(-50%) translateY(0)';
         }, 10);
         
-        // Auto-eliminar después de 3 segundos
         setTimeout(() => {
             mensaje.style.opacity = '0';
             mensaje.style.transform = 'translateX(-50%) translateY(-20px)';
@@ -176,20 +186,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }, 3000);
     }
-    
-    // CSS para los mensajes (inyectado automáticamente)
-    const estiloMensajes = document.createElement('style');
-    estiloMensajes.textContent = `
-        .mensaje-flotante {
-            animation: fadeInOut 3s ease;
-        }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-        }
-    `;
-    document.head.appendChild(estiloMensajes);
 });
