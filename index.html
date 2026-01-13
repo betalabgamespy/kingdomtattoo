@@ -69,7 +69,7 @@
             </div>
             
             <div class="mapa-wrapper">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3603.8667230201636!2d-57.32553822476966!3d-25.409271477574972!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945c4adebd9bbe35%3A0xb2bacb4b9ea87972!2sAv.%20Jap%C3%B3n!5e0!3m2!1sen!2spy!4v1768141716294!5m2!1sen!2spy" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3603.8667230201636!2d-57.32553822476966!3d-25.409271477574972!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945c4adebd9bbe35%3A0xb2bacb4b9ea87972!2sAv.%20Jap%C3%B3n!5e0!3m2!1sen!2spy!4v1768141716294!5m2!1sen!2spy" 
                     width="100%"
                     height="100%"
                     style="border:0;"
@@ -81,34 +81,35 @@
         </div>
     </section>
 
-    <!--SECCIÓN VALORACION-->
+    <!--SECCIÓN VALORACION CON ESTRELLAS -->
     <section class="seccion-comentarios reveal-on-scroll">
-    <h2>Opiniones</h2>
-    
-    <div class="formulario">
-        <input type="text" id="nombre" placeholder="Tu nombre">
+        <h2>Opiniones</h2>
         
-        <!-- Estrellas interactivas -->
-        <div class="estrellas-container">
-            <div class="estrellas">
-                <span class="estrella" data-value="1">★</span>
-                <span class="estrella" data-value="2">★</span>
-                <span class="estrella" data-value="3">★</span>
-                <span class="estrella" data-value="4">★</span>
-                <span class="estrella" data-value="5">★</span>
+        <!-- FORMULARIO CON ESTRELLAS -->
+        <form id="form-comentarios" class="formulario">
+            <input type="text" name="nombre" placeholder="Tu nombre (opcional)">
+            
+            <!-- ESTRELLAS -->
+            <div class="estrellas-container">
+                <div class="estrellas">
+                    <span class="estrella" data-value="1">★</span>
+                    <span class="estrella" data-value="2">★</span>
+                    <span class="estrella" data-value="3">★</span>
+                    <span class="estrella" data-value="4">★</span>
+                    <span class="estrella" data-value="5">★</span>
+                </div>
+                <input type="hidden" name="puntuacion" id="puntuacion-input" value="0">
             </div>
-            <div class="puntuacion-texto">Selecciona estrellas</div>
-        </div>
+            
+            <textarea name="comentario" placeholder="Tu comentario..." rows="3"></textarea>
+            <button type="submit" class="btn-enviar">Publicar Comentario</button>
+        </form>
         
-        <textarea id="comentario" placeholder="Tu comentario..." rows="3"></textarea>
-        <button class="btn-enviar">Enviar</button>
-    </div>
-    
-    <div class="lista-comentarios">
-        <!-- Aquí se cargarán automáticamente las últimas 5 valoraciones guardadas -->
-        <!-- Si no hay comentarios, se muestra el mensaje por defecto -->
-    </div>
-</section>
+        <!-- LISTA DE COMENTARIOS -->
+        <div class="lista-comentarios">
+            <p class="sin-comentarios">No hay comentarios aún. ¡Sé el primero!</p>
+        </div>
+    </section>
 
     <!--FOOTER-->
     <footer class="reveal-on-scroll">
@@ -123,48 +124,194 @@
         </div>
     </footer>
 
-    <!-- JAVASCRIPT PARA ANIMACIONES DE SCROLL -->
+    <!-- JAVASCRIPT CON ESTRELLAS -->
     <script>
-        // ANIMACIONES AL SCROLL
         document.addEventListener('DOMContentLoaded', function() {
-            // Elementos con animación de scroll
+            // Animaciones al scroll
             const reveals = document.querySelectorAll('.reveal-on-scroll');
-            const images = document.querySelectorAll('.img-galeria-trabajos, .img-artistas');
             
-            // Verificar si un elemento está en vista
-            function isElementInViewport(el) {
-                const rect = el.getBoundingClientRect();
-                return (
-                    rect.top <= (window.innerHeight - 100) &&
-                    rect.bottom >= 0
-                );
-            }
-            
-            // Animación principal para secciones
             function checkReveals() {
                 reveals.forEach(el => {
-                    if (isElementInViewport(el)) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= (window.innerHeight - 100) && rect.bottom >= 0) {
                         el.classList.add('show');
                     }
                 });
-                
-                // Animación para imágenes individuales con delay
-                images.forEach((img, index) => {
-                    if (isElementInViewport(img)) {
-                        setTimeout(() => {
-                            img.classList.add('show');
-                        }, index * 100); // Delay escalonado
+            }
+            
+            checkReveals();
+            window.addEventListener('scroll', checkReveals);
+            
+            // ========== SISTEMA DE COMENTARIOS CON ESTRELLAS ==========
+            const form = document.getElementById('form-comentarios');
+            const listaComentarios = document.querySelector('.lista-comentarios');
+            const estrellas = document.querySelectorAll('.estrella');
+            const puntuacionInput = document.getElementById('puntuacion-input');
+            let puntuacionSeleccionada = 0;
+            
+            // Configurar Formspree
+            const FORMSPREE_ID = 'https://formspree.io/f/mqeekwqo';
+            form.action = `https://formspree.io/f/${FORMSPREE_ID}`;
+            
+            // ========== CONFIGURAR ESTRELLAS ==========
+            estrellas.forEach((estrella, index) => {
+                estrella.addEventListener('click', function() {
+                    puntuacionSeleccionada = index + 1;
+                    puntuacionInput.value = puntuacionSeleccionada;
+                    
+                    // Resetear todas
+                    estrellas.forEach(e => {
+                        e.style.color = '#d0d0d0';
+                    });
+                    
+                    // Pintar seleccionadas
+                    for(let i = 0; i < puntuacionSeleccionada; i++) {
+                        estrellas[i].style.color = '#222';
                     }
+                });
+                
+                // Efecto hover
+                estrella.addEventListener('mouseover', function() {
+                    for(let i = 0; i <= index; i++) {
+                        estrellas[i].style.color = '#222';
+                    }
+                });
+                
+                estrella.addEventListener('mouseout', function() {
+                    estrellas.forEach((e, i) => {
+                        if(i >= puntuacionSeleccionada) {
+                            e.style.color = '#d0d0d0';
+                        }
+                    });
+                });
+            });
+            
+            // ========== MANEJAR ENVÍO ==========
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Obtener datos
+                const nombre = form.nombre.value || 'Anónimo';
+                const comentario = form.comentario.value;
+                const puntuacion = puntuacionInput.value || '0';
+                
+                // Validación mínima
+                if (!comentario.trim()) {
+                    alert('Escribe un comentario');
+                    return;
+                }
+                
+                // Crear comentario
+                const fecha = new Date().toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                // Crear estrellas HTML
+                const estrellasHTML = '★'.repeat(puntuacion) + '☆'.repeat(5 - puntuacion);
+                
+                const comentarioHTML = `
+                    <div class="comentario">
+                        <div class="comentario-header">
+                            <span class="nombre-cliente">${nombre}</span>
+                            <div class="estrellas-comentario">${estrellasHTML}</div>
+                        </div>
+                        <p class="texto-comentario">${comentario}</p>
+                        <span class="fecha">Hoy ${fecha}</span>
+                    </div>
+                `;
+                
+                // Mostrar en la lista
+                const sinComentarios = listaComentarios.querySelector('.sin-comentarios');
+                if (sinComentarios) sinComentarios.remove();
+                
+                listaComentarios.insertAdjacentHTML('afterbegin', comentarioHTML);
+                
+                // Limitar a 10 comentarios
+                const todosComentarios = listaComentarios.querySelectorAll('.comentario');
+                if (todosComentarios.length > 10) {
+                    todosComentarios[10].remove();
+                }
+                
+                // Guardar en localStorage
+                guardarEnLocalStorage({
+                    nombre: nombre,
+                    comentario: comentario,
+                    puntuacion: parseInt(puntuacion),
+                    fecha: `Hoy ${fecha}`
+                });
+                
+                // Enviar a Formspree en segundo plano
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'Accept': 'application/json' }
+                }).catch(error => console.log('Error enviando:', error));
+                
+                // Limpiar formulario
+                form.reset();
+                resetearEstrellas();
+            });
+            
+            // ========== FUNCIONES AUXILIARES ==========
+            function resetearEstrellas() {
+                puntuacionSeleccionada = 0;
+                puntuacionInput.value = 0;
+                estrellas.forEach(e => {
+                    e.style.color = '#d0d0d0';
                 });
             }
             
-            // Ejecutar al cargar y al hacer scroll
-            checkReveals();
-            window.addEventListener('scroll', checkReveals);
-            window.addEventListener('resize', checkReveals);
+            function guardarEnLocalStorage(comentario) {
+                try {
+                    comentario.id = Date.now();
+                    const guardados = localStorage.getItem('comentariosTattoo');
+                    let comentarios = guardados ? JSON.parse(guardados) : [];
+                    
+                    comentarios.unshift(comentario);
+                    
+                    if (comentarios.length > 20) {
+                        comentarios = comentarios.slice(0, 20);
+                    }
+                    
+                    localStorage.setItem('comentariosTattoo', JSON.stringify(comentarios));
+                } catch (error) {
+                    console.log('Error guardando:', error);
+                }
+            }
+            
+            // Cargar comentarios guardados al iniciar
+            function cargarComentariosGuardados() {
+                try {
+                    const guardados = localStorage.getItem('comentariosTattoo');
+                    if (guardados) {
+                        const comentarios = JSON.parse(guardados);
+                        const sinComentarios = listaComentarios.querySelector('.sin-comentarios');
+                        if (sinComentarios) sinComentarios.remove();
+                        
+                        comentarios.forEach(comentario => {
+                            const estrellasHTML = '★'.repeat(comentario.puntuacion) + '☆'.repeat(5 - comentario.puntuacion);
+                            
+                            const comentarioHTML = `
+                                <div class="comentario">
+                                    <div class="comentario-header">
+                                        <span class="nombre-cliente">${comentario.nombre}</span>
+                                        <div class="estrellas-comentario">${estrellasHTML}</div>
+                                    </div>
+                                    <p class="texto-comentario">${comentario.comentario}</p>
+                                    <span class="fecha">${comentario.fecha}</span>
+                                </div>
+                            `;
+                            listaComentarios.insertAdjacentHTML('beforeend', comentarioHTML);
+                        });
+                    }
+                } catch (error) {
+                    console.log('Error cargando:', error);
+                }
+            }
+            
+            cargarComentariosGuardados();
         });
     </script>
-    
-    <script src="JAVASCRIPTS/valoracion.js"></script>
 </body>
 </html>
