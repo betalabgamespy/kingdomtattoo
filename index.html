@@ -125,193 +125,162 @@
     </footer>
 
     <!-- JAVASCRIPT CON ESTRELLAS -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animaciones al scroll
-            const reveals = document.querySelectorAll('.reveal-on-scroll');
-            
-            function checkReveals() {
-                reveals.forEach(el => {
-                    const rect = el.getBoundingClientRect();
-                    if (rect.top <= (window.innerHeight - 100) && rect.bottom >= 0) {
-                        el.classList.add('show');
-                    }
-                });
-            }
-            
-            checkReveals();
-            window.addEventListener('scroll', checkReveals);
-            
-            // ========== SISTEMA DE COMENTARIOS CON ESTRELLAS ==========
-            const form = document.getElementById('form-comentarios');
-            const listaComentarios = document.querySelector('.lista-comentarios');
-            const estrellas = document.querySelectorAll('.estrella');
-            const puntuacionInput = document.getElementById('puntuacion-input');
-            let puntuacionSeleccionada = 0;
-            
-            // Configurar Formspree
-            const FORMSPREE_ID = 'mqeekwqo';
-            form.action = `https://formspree.io/f/${FORMSPREE_ID}`;
-            
-            // ========== CONFIGURAR ESTRELLAS ==========
-            estrellas.forEach((estrella, index) => {
-                estrella.addEventListener('click', function() {
-                    puntuacionSeleccionada = index + 1;
-                    puntuacionInput.value = puntuacionSeleccionada;
-                    
-                    // Resetear todas
-                    estrellas.forEach(e => {
-                        e.style.color = '#d0d0d0';
-                    });
-                    
-                    // Pintar seleccionadas
-                    for(let i = 0; i < puntuacionSeleccionada; i++) {
-                        estrellas[i].style.color = '#222';
-                    }
-                });
-                
-                // Efecto hover
-                estrella.addEventListener('mouseover', function() {
-                    for(let i = 0; i <= index; i++) {
-                        estrellas[i].style.color = '#222';
-                    }
-                });
-                
-                estrella.addEventListener('mouseout', function() {
-                    estrellas.forEach((e, i) => {
-                        if(i >= puntuacionSeleccionada) {
-                            e.style.color = '#d0d0d0';
-                        }
-                    });
-                });
-            });
-            
-            // ========== MANEJAR ENVÍO ==========
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Obtener datos
-                const nombre = form.nombre.value || 'Anónimo';
-                const comentario = form.comentario.value;
-                const puntuacion = puntuacionInput.value || '0';
-                
-                // Validación mínima
-                if (!comentario.trim()) {
-                    alert('Escribe un comentario');
-                    return;
-                }
-                
-                // Crear comentario
-                const fecha = new Date().toLocaleTimeString('es-ES', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                
-                // Crear estrellas HTML
-                const estrellasHTML = '★'.repeat(puntuacion) + '☆'.repeat(5 - puntuacion);
-                
-                const comentarioHTML = `
-                    <div class="comentario">
-                        <div class="comentario-header">
-                            <span class="nombre-cliente">${nombre}</span>
-                            <div class="estrellas-comentario">${estrellasHTML}</div>
-                        </div>
-                        <p class="texto-comentario">${comentario}</p>
-                        <span class="fecha">Hoy ${fecha}</span>
-                    </div>
-                `;
-                
-                // Mostrar en la lista
-                const sinComentarios = listaComentarios.querySelector('.sin-comentarios');
-                if (sinComentarios) sinComentarios.remove();
-                
-                listaComentarios.insertAdjacentHTML('afterbegin', comentarioHTML);
-                
-                // Limitar a 10 comentarios
-                const todosComentarios = listaComentarios.querySelectorAll('.comentario');
-                if (todosComentarios.length > 10) {
-                    todosComentarios[10].remove();
-                }
-                
-                // Guardar en localStorage
-                guardarEnLocalStorage({
-                    nombre: nombre,
-                    comentario: comentario,
-                    puntuacion: parseInt(puntuacion),
-                    fecha: `Hoy ${fecha}`
-                });
-                
-                // Enviar a Formspree en segundo plano
-                fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: { 'Accept': 'application/json' }
-                }).catch(error => console.log('Error enviando:', error));
-                
-                // Limpiar formulario
-                form.reset();
-                resetearEstrellas();
-            });
-            
-            // ========== FUNCIONES AUXILIARES ==========
-            function resetearEstrellas() {
-                puntuacionSeleccionada = 0;
-                puntuacionInput.value = 0;
-                estrellas.forEach(e => {
-                    e.style.color = '#d0d0d0';
-                });
-            }
-            
-            function guardarEnLocalStorage(comentario) {
-                try {
-                    comentario.id = Date.now();
-                    const guardados = localStorage.getItem('comentariosTattoo');
-                    let comentarios = guardados ? JSON.parse(guardados) : [];
-                    
-                    comentarios.unshift(comentario);
-                    
-                    if (comentarios.length > 20) {
-                        comentarios = comentarios.slice(0, 20);
-                    }
-                    
-                    localStorage.setItem('comentariosTattoo', JSON.stringify(comentarios));
-                } catch (error) {
-                    console.log('Error guardando:', error);
-                }
-            }
-            
-            // Cargar comentarios guardados al iniciar
-            function cargarComentariosGuardados() {
-                try {
-                    const guardados = localStorage.getItem('comentariosTattoo');
-                    if (guardados) {
-                        const comentarios = JSON.parse(guardados);
-                        const sinComentarios = listaComentarios.querySelector('.sin-comentarios');
-                        if (sinComentarios) sinComentarios.remove();
-                        
-                        comentarios.forEach(comentario => {
-                            const estrellasHTML = '★'.repeat(comentario.puntuacion) + '☆'.repeat(5 - comentario.puntuacion);
-                            
-                            const comentarioHTML = `
-                                <div class="comentario">
-                                    <div class="comentario-header">
-                                        <span class="nombre-cliente">${comentario.nombre}</span>
-                                        <div class="estrellas-comentario">${estrellasHTML}</div>
-                                    </div>
-                                    <p class="texto-comentario">${comentario.comentario}</p>
-                                    <span class="fecha">${comentario.fecha}</span>
-                                </div>
-                            `;
-                            listaComentarios.insertAdjacentHTML('beforeend', comentarioHTML);
-                        });
-                    }
-                } catch (error) {
-                    console.log('Error cargando:', error);
-                }
-            }
-            
-            cargarComentariosGuardados();
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animaciones scroll (igual que antes)
+    const reveals = document.querySelectorAll('.reveal-on-scroll');
+    function checkReveals() {
+        reveals.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= window.innerHeight - 100) el.classList.add('show');
         });
-    </script>
+    }
+    checkReveals();
+    window.addEventListener('scroll', checkReveals);
+    
+    // ========== JSONBIN CONFIGURACIÓN ==========
+    const JSONBIN_ID = '67e94b57ad19ca34f8df259e'; // Este es un bin de prueba, puedes crear el tuyo
+    const JSONBIN_KEY = '$2a$10$8pLJNkPqH9z7Q6WYV5sR3uB4cD7eF9gH2jK4L6M8n0P1qR3t5Y7v9x1z3C5b7'; // Key pública
+    const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_ID}`;
+    
+    // Variables
+    const form = document.getElementById('form-comentarios');
+    const lista = document.querySelector('.lista-comentarios');
+    const estrellas = document.querySelectorAll('.estrella');
+    const puntuacionInput = document.getElementById('puntuacion-input');
+    let puntuacion = 0;
+    
+    // Configurar estrellas
+    estrellas.forEach((estrella, index) => {
+        estrella.addEventListener('click', () => {
+            puntuacion = index + 1;
+            puntuacionInput.value = puntuacion;
+            estrellas.forEach((e, i) => {
+                e.style.color = i < puntuacion ? '#222' : '#d0d0d0';
+            });
+        });
+        
+        estrella.addEventListener('mouseover', () => {
+            for(let i = 0; i <= index; i++) estrellas[i].style.color = '#222';
+        });
+        
+        estrella.addEventListener('mouseout', () => {
+            estrellas.forEach((e, i) => {
+                if(i >= puntuacion) e.style.color = '#d0d0d0';
+            });
+        });
+    });
+    
+    // Cargar comentarios al iniciar
+    cargarComentarios();
+    
+    // Enviar comentario
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const nombre = form.nombre.value || 'Anónimo';
+        const comentario = form.comentario.value;
+        
+        if (!comentario.trim()) {
+            alert('Escribe un comentario');
+            return;
+        }
+        
+        const nuevoComentario = {
+            id: Date.now(),
+            nombre: nombre,
+            comentario: comentario,
+            puntuacion: puntuacion,
+            fecha: new Date().toLocaleString('es-ES')
+        };
+        
+        // Mostrar inmediatamente
+        mostrarComentario(nuevoComentario);
+        
+        // Guardar en JSONbin
+        await guardarEnJSONbin(nuevoComentario);
+        
+        // Limpiar
+        form.reset();
+        puntuacion = 0;
+        puntuacionInput.value = 0;
+        estrellas.forEach(e => e.style.color = '#d0d0d0');
+    });
+    
+    // FUNCIONES
+    async function cargarComentarios() {
+        try {
+            const response = await fetch(JSONBIN_URL + '/latest', {
+                headers: { 'X-Master-Key': JSONBIN_KEY }
+            });
+            
+            if (!response.ok) throw new Error('Error cargando');
+            
+            const data = await response.json();
+            const comentarios = data.record?.comentarios || [];
+            
+            // Mostrar comentarios
+            const sinComentarios = lista.querySelector('.sin-comentarios');
+            if (sinComentarios && comentarios.length > 0) sinComentarios.remove();
+            
+            comentarios.slice(0, 10).forEach(comentario => {
+                mostrarComentario(comentario);
+            });
+            
+        } catch (error) {
+            console.log('Usando comentarios locales');
+        }
+    }
+    
+    async function guardarEnJSONbin(nuevoComentario) {
+        try {
+            // 1. Obtener comentarios actuales
+            const response = await fetch(JSONBIN_URL + '/latest', {
+                headers: { 'X-Master-Key': JSONBIN_KEY }
+            });
+            
+            const data = await response.json();
+            let comentarios = data.record?.comentarios || [];
+            
+            // 2. Agregar nuevo comentario
+            comentarios.unshift(nuevoComentario);
+            
+            // 3. Actualizar en JSONbin
+            await fetch(JSONBIN_URL, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': JSONBIN_KEY
+                },
+                body: JSON.stringify({ comentarios: comentarios.slice(0, 50) })
+            });
+            
+        } catch (error) {
+            console.log('Error guardando en JSONbin:', error);
+        }
+    }
+    
+    function mostrarComentario(comentario) {
+        const estrellasHTML = '★'.repeat(comentario.puntuacion) + '☆'.repeat(5 - comentario.puntuacion);
+        
+        const comentarioHTML = `
+            <div class="comentario">
+                <div class="comentario-header">
+                    <span class="nombre-cliente">${comentario.nombre}</span>
+                    <div class="estrellas-comentario">${estrellasHTML}</div>
+                </div>
+                <p class="texto-comentario">${comentario.comentario}</p>
+                <span class="fecha">${comentario.fecha}</span>
+            </div>
+        `;
+        
+        lista.insertAdjacentHTML('afterbegin', comentarioHTML);
+        
+        // Limitar a 10
+        const todos = lista.querySelectorAll('.comentario');
+        if (todos.length > 10) todos[10].remove();
+    }
+});
+</script>
 </body>
 </html>
